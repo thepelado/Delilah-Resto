@@ -1,0 +1,3 @@
+username,password,firstname,lastname,address,email,phone_number,is_admin
+admin,123456,admin,admin,Fake St 1234,admin@gmail.com,2236123456,1
+user,123456,user,user,Fake Ave 1234,user@gmail.com,2235123456,0
