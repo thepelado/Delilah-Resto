@@ -1,4 +1,4 @@
-# **ACAMICA DWFS PROJECT - DELILAH RESTÓ**. ![cocktail_img](/assets/images/project-icon.png)
+# **np**. ![cocktail_img](/assets/images/project-icon.png)
 
 **An API to manage your own restaurant.**
 
@@ -75,8 +75,10 @@ Before start using the server, don't forget to edit `config.js` file (`db/sequel
 
 ## Run the API
 
+```
 $ cd server
 $ node app.js
+```
 
 ## Dependencies used
 
