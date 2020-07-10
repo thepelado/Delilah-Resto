@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # **np**. ![project-icon_img](/assets/images/project-icon.png)
+=======
+# **np**. ![project-icon.png](/assets/images/project-icon.png)
+>>>>>>> 521ba8b809d3876555722efe1267083403507514
 
 **An API to manage your own restaurant.**
 
