@@ -1,4 +1,4 @@
-# **np**. ![cocktail_img](/assets/images/project-icon.png)
+# **np**. ![project-icon_img](/assets/images/project-icon.png)
 
 **An API to manage your own restaurant.**
 
