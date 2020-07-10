@@ -1,4 +1,4 @@
-# **DELILAH RESTÓ**. ![cocktail_img](/assets/images/project-icon.png)
+# **ACAMICA DWFS PROJECT - DELILAH RESTÓ**. ![cocktail_img](/assets/images/project-icon.png)
 
 **An API to manage your own restaurant.**
 
