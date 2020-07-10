@@ -1,4 +1,4 @@
-# **DELILAH RESTÓ API PROJECT**. ![project-icon_img](/assets/images/project-icon.png)
+# **DELILAH RESTÓ API PROJECT**. ![cocktail_img](/assets/images/project-icon.png)
 
 **An API to manage your own restaurant.**
 
@@ -21,7 +21,7 @@ Features:
 ### Clone the REPO:
 
 ```
-$ git clone https://github.com/thepelado/Delilah-Resto.git
+$ git clone https://github.com/alazzuri/delilah-resto.git
 ```
 
 or you just can download it from Github
@@ -77,7 +77,7 @@ Before start using the server, don't forget to edit `config.js` file (`db/sequel
 
 ```
 $ cd server
-$ node app.js
+$ node index.js
 ```
 
 ## Dependencies used
