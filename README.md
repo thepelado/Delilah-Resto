@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# **np**. ![project-icon_img](/assets/images/project-icon.png)
-=======
-# **np**. ![project-icon.png](/assets/images/project-icon.png)
->>>>>>> 521ba8b809d3876555722efe1267083403507514
+# **DELILAH RESTÓ API PROJECT**. ![project-icon_img](/assets/images/project-icon.png)
 
 **An API to manage your own restaurant.**
 
