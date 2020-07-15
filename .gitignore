@@ -5,9 +5,9 @@
 # Vs Code Workspace #
 ###################
 *.code-workspace
-*.vscode
 
 node_modules
+.vscode
 
 # Compiled source #
 ###################
