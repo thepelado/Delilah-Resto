@@ -5,9 +5,7 @@ const { findUserByUsername } = require('../users/index');
 
 //Function that validate if user is admin or isn't
 const isAdmin = (req, res, next) => {
-    const is_admin = req.user.is_admin;
-    if (is_admin) {
-        req.is_admin = is_admin;
+    if (req.user.is_admin) {
         next();
     } else {
         res.status(403).send("Forbidden");
@@ -15,7 +13,7 @@ const isAdmin = (req, res, next) => {
 }
 
 //Function that return user logged data
-const validateUser = (req, res, next) => {
+const authUser = (req, res, next) => {
     try {
         if (!req.headers.authorization)
         {
@@ -31,25 +29,24 @@ const validateUser = (req, res, next) => {
 }
 
 //Function for login route
-const validateCredentials = async (req, res, next) => {
+const validateCredentials = async (req, res) => {
     const { username, password } = req.body;
     try {
         const registeredUser = await findUserByUsername(username);
         if (registeredUser) {
-            const { user_id, password: userPassword, is_admin, } = registeredUser;
+            const { id, password: userPassword, is_admin, } = registeredUser;
             if (password === userPassword) {
-                const token = jwt.sign({ user_id, username, is_admin }, secret);
-                req.jwtToken = token;
-                next();
+                const token = jwt.sign({ id, username, is_admin }, secret, { expiresIn: '30m'});
+                res.status(200).json(token);
             } else {
                 res.status(400).json("Wrong password");
             }
         } else {
             res.status(400).json("Invalid Username");
         }
-    } catch (err) {
-        next(new Error(err));
+    } catch (error) {
+        res.status(500).send(`ERROR: ${error}`);
     }
 }
 
-module.exports = { isAdmin, validateUser, validateCredentials };
+module.exports = { isAdmin, authUser, validateCredentials };

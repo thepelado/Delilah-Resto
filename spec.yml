@@ -144,8 +144,8 @@ paths:
           required: true
           type: "string"
       responses:
-        200:
-          description: "Deleted"
+        204:
+          description: "Deleted, no content"
         401:
           description: "Token has expired. Please login again"
         403:
@@ -278,8 +278,8 @@ paths:
           required: true
           type: "string"
       responses:
-        200:
-          description: "Deleted"
+        204:
+          description: "Deleted, no content"
         401:
           description: "Token has expired. Please login again"
         403:

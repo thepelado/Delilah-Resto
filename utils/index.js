@@ -1,24 +1,23 @@
 //Levanto las funciones de cada modulo
 const {
   isAdmin,
-  validateUser,
+  authUser,
   validateCredentials
 } = require("./security");
 
 const {
-    findUserByName,
-    findUserByUsername,
     getUsers,
     registerUser,
     validateExistingUser,
+    validateArgumentsUser
 } = require("./users");
 
 const {
-    findOrderById,
     registerOrder,
     getOrders,
     updateOrderStatus,
-    deleteOrder
+    deleteOrder,
+    validateArgumentsOrder
 } = require("./orders");
 
 const {
@@ -27,16 +26,14 @@ const {
   registerProduct,
   updateProduct,
   deleteProduct,
-  validateExistingProduct
+  validateExistingProduct,
+  validateArgumentsProduct
 } = require("./products");
 
 module.exports = {
   deleteOrder,
   deleteProduct,
-  findOrderById,
   findProductById,
-  findUserByName,
-  findUserByUsername,
   getOrders,
   getProducts,
   getUsers,
@@ -48,6 +45,9 @@ module.exports = {
   validateExistingUser,
   isAdmin,
   validateExistingProduct,
-  validateUser,
-  validateCredentials,  
+  authUser,
+  validateCredentials,
+  validateArgumentsOrder,
+  validateArgumentsUser,
+  validateArgumentsProduct
 };

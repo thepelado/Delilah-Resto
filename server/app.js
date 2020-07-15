@@ -1,12 +1,12 @@
 const bodyParser = require('body-parser');
 const express = require('express');
 const cors = require('cors');
-const app = express();
+const server = express();
 
 //Middlewares
-app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
-app.use(bodyParser.json()); // parse application/json
-app.use(cors()); // evitar problemas CORS
+server.use(bodyParser.urlencoded({ extended: false })); // parse serverlication/x-www-form-urlencoded
+server.use(bodyParser.json()); // parse serverlication/json
+server.use(cors()); // evitar problemas CORS
 
 //UTILS
 const {    
@@ -14,7 +14,7 @@ const {
     validateExistingUser,
     getUsers,
     isAdmin,
-    validateUser,
+    authUser,
     validateCredentials,
     getOrders,
     registerOrder,
@@ -24,63 +24,34 @@ const {
     registerProduct,
     updateProduct,
     deleteProduct,
-    validateExistingProduct
+    validateExistingProduct,
+    validateArgumentsProduct,
+    validateArgumentsOrder,
+    validateArgumentsUser
 } = require("../utils");
 
-app.get('/', (req, res) => {
+server.get('/', (req, res) => {
     res.send('Menu');
 });
 
 //Users Routes
-app.get('/users', validateUser, isAdmin, getUsers, (req, res) => {
-    const list = req.usersList;
-    res.status(200).json(list);
-});
-
-app.post("/users", validateExistingUser, registerUser, (req, res) => {
-    res.status(201).json({ userId: req.createdUserId });
-});
-
-app.post('/users/login', validateCredentials, (req, res) => {
-    res.status(200).json(req.jwtToken);
-});
-
-//Orders Routes
-app.get('/orders', validateUser, getOrders, (req, res) => {
-    const list = req.ordersList;
-    res.status(200).json(list);
-});
-
-app.post('/orders', registerOrder, (req, res) => {
-    res.status(201).json(req.createdOrder);
-});
-
-app.put('/orders/:orderId', validateUser, updateOrderStatus, (req, res) => {
-    res.status(202).json(req.updatedOrder);
-});
-
-app.delete('/orders/:orderId', validateUser, deleteOrder, (req, res) => {
-    res.status(204).json();
-});
+server.get('/users', authUser, isAdmin, getUsers);
+server.post("/users", validateArgumentsUser, validateExistingUser, registerUser);
+server.post('/users/login', validateCredentials);
 
 // PRODUCTS ENDOPINTS
-app.get("/products", getProducts, (req, res) => {
-    const list = req.productsList;
-    res.status(200).json(list);
-});
-  
-app.post("/products", validateUser, validateExistingProduct, registerProduct, (req, res) => {
-    res.status(201).json({ productId: req.createdproductId });
-});
-  
-app.put("/products/:productId", validateUser, updateProduct, (req, res) => {
-    res.status(202).json(req.updatedProduct);
-});
-  
-app.delete("/products/:productId", validateUser, deleteProduct, (req, res) => {
-    res.status(204).json();
-});
+server.get("/products", getProducts);  
+server.post("/products", authUser, isAdmin, validateArgumentsProduct, validateExistingProduct, registerProduct);
+server.put("/products/:productId", authUser, isAdmin, validateArgumentsProduct, validateExistingProduct, updateProduct);
+server.delete("/products/:productId", authUser, isAdmin, deleteProduct);
 
-app.listen(3000, () => {
+//Orders Routes
+server.get('/orders', authUser, getOrders);
+server.post('/orders', validateArgumentsOrder, registerOrder);
+server.put('/orders/:orderId', authUser, isAdmin, updateOrderStatus);
+server.delete('/orders/:orderId', authUser, isAdmin, deleteOrder);
+
+
+server.listen(3000, () => {
     console.log('Server is listening at port 3000');
 });

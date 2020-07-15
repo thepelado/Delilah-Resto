@@ -20,12 +20,9 @@ const statusArray = [
 
 //Return only head of the order
 async function findOrderById(orderId) {
-  const query = selectQuery("orders", "*", `order_id = ${orderId}`);
+  const query = selectQuery("orders", "*", `id = ${orderId}`);
   const [dbOrder] = await sequelize.query(query, { raw: true });
-  const foundOrder = await dbOrder.find(
-    (element) => element.order_id === orderId
-  );
-  return foundOrder;
+  return dbOrder;
 }
 
 //Return the object full (head + details)
@@ -33,26 +30,23 @@ async function findFullOrderById(orderId) {
   const ordersQuery = joinQuery(
     "orders",
     "orders.*, users.username, users.firstname, users.lastname,users.address, users.email, users.phone_number",
-    ["users ON orders.user_id = users.user_id"],
-    `order_id = ${orderId}`
+    ["users ON orders.user_id = users.id"],
+    `orders.id = ${orderId}`
   );
   const [orderInfo] = await sequelize.query(ordersQuery, { raw: true });
-  if (orderInfo[0].order_id)
-  {
-    const order = orderInfo[0];
-    const ordersProductsQuery = joinQuery(
-      "orders_products",
-      "orders_products.product_quantity, products.product_name, products.product_price, products.product_photo",
-      ["products ON orders_products.product_id = products.product_id"],
-      `order_id = ${orderId}`
-    );
-    const [orderDetailInfo] = await sequelize.query(ordersProductsQuery, { raw: true });
-    order.products = await orderDetailInfo;
-    return await order;
-  }  
+  let order = orderInfo[0];
+  const ordersProductsQuery = joinQuery(
+    "orders_products",
+    "orders_products.product_quantity, products.product_name, products.product_price, products.product_photo",
+    ["products ON orders_products.product_id = products.id"],
+    `order_id = ${orderId}`
+  );
+  const [orderDetailInfo] = await sequelize.query(ordersProductsQuery, { raw: false });
+  order.products = orderDetailInfo;
+  return order;
 }
 
-//Insert Order
+//Insert Order Head
 async function createOrderHead(orderTime, orderDesc, totalPrice, payment_method, user_id)
 {
   const query = insertQuery(
@@ -64,19 +58,18 @@ async function createOrderHead(orderTime, orderDesc, totalPrice, payment_method,
   return orderId;
 }
 
-//Insert Order details
+//Insert Order Details
 async function createOrderDetails(orderId, products)
 {
   //Create the order details
-  products.forEach(async (product) => {
-    const { productId, quantity } = product;
-    const query = insertQuery(
-      "orders_products",
-      "order_id, product_id, product_quantity",
-      [orderId, productId, quantity]
-    );
-    await sequelize.query(query, { raw: true });
-  });
+  await sequelize.query(
+    `INSERT INTO delilah_resto.orders_products (order_id, product_id, product_quantity) 
+    VALUES ${products.map(product => `(${orderId}, ${product.productId}, ${product.quantity})`).join(',')};`,
+    {
+       replacements: products,
+       type: sequelize.QueryTypes.INSERT
+    }
+  ); 
 }
 
 //Make the product's details and the total for the order head
@@ -91,40 +84,14 @@ async function obtainOrderProductsDetails(products) {
   return [orderDescription, subtotal];
 }
 
-async function getOrders(req, res, next) {
-  try {
-    const query = (req.user.is_admin) ? selectQuery("orders", "order_id", null, "order_time DESC") : selectQuery("orders", "order_id", `orders.user_id = ${req.user.user_id}`, "order_time DESC");
-    console.log(query);
-    const [dbOrders] = await sequelize.query(query, { raw: true });
-    if (dbOrders && dbOrders.length > 0)
-    {
-      let orders = [];
-      for (let i = 0; i < dbOrders.length; i++) {
-        let order = await findFullOrderById(dbOrders[i].order_id);
-        await orders.push(order);
-      };
-      req.ordersList = orders;
-      next();
-    }
-  } catch (err) {
-    next(new Error(err));
-  }
-}
-
-async function registerOrder(req, res, next) {
+//Validate arguments for Post Order
+async function validateArgumentsOrder(req, res, next)
+{
   const { username, products, payment_method } = req.body;
   if (username && products && payment_method) {
     const userData = await findUserByUsername(username);
     if (userData) {
-      //Get the params for create the order
-      const userId = userData.user_id;
-      const orderTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
-      const [orderDesc, totalPrice] = await obtainOrderProductsDetails(products);
-      //Create the order and, after, the details
-      const orderId = await createOrderHead(orderTime, orderDesc, totalPrice, payment_method, userId);
-      await createOrderDetails(orderId, products);
-      //Make the object for the response
-      req.createdOrder = await findFullOrderById(orderId);
+      req.userData = userData;
       next();
     } else {
       res.status(400).json("User not found");
@@ -134,56 +101,87 @@ async function registerOrder(req, res, next) {
   }
 }
 
-async function updateOrderStatus(req, res, next) {
-  const id = +req.params.orderId;
+//Get Orders Function
+async function getOrders(req, res) {
+  try {
+    const query = (req.user.is_admin) ? selectQuery("orders", "id", null, "order_time DESC") : selectQuery("orders", "id", `orders.user_id = ${req.user.id}`, "order_time DESC");
+    const [dbOrders] = await sequelize.query(query, { raw: true });
+    let orders = [];
+    for (let i = 0; i < dbOrders.length; i++) {
+      let order = await findFullOrderById(dbOrders[i].id);
+      await orders.push(order);
+    };
+    res.status(200).json(orders);
+  }
+  catch (error) {
+    res.status(500).send(`ERROR: ${error}`);
+  }
+}
+
+//Post Function
+async function registerOrder(req, res) {
+  try {
+    const { products, payment_method } = req.body;
+    const userId = req.userData.id;
+    const orderTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const [orderDesc, totalPrice] = await obtainOrderProductsDetails(products);
+    //Create the order and, after, the details
+    const orderId = await createOrderHead(orderTime, orderDesc, totalPrice, payment_method, userId);
+    await createOrderDetails(orderId, products);
+    //Make the object for the response
+    res.status(201).json(await findFullOrderById(orderId));
+  }
+  catch (error) {
+    res.status(500).send(`ERROR: ${error}`);
+  }
+}
+
+//Update Function
+async function updateOrderStatus(req, res) {
+  const id = req.params.orderId;
   const { status:newStatus } = req.body;
-  const validStatus = statusArray.find( (status) => status === newStatus);
-  if (validStatus) {
+  if (statusArray.find( (status) => status === newStatus)) {
     try {
       const orderToUpdate = await findOrderById(id);
-      if (orderToUpdate) {
+      if (orderToUpdate && orderToUpdate.length > 0) {
         const query = updateQuery(
           "orders",
           `order_status = '${newStatus}'`,
-          `order_id = ${id}`
+          `id = ${id}`
         );
         await sequelize.query(query, { raw: true });
-        req.updatedOrder = await findOrderById(id);
+        res.status(202).json(await findOrderById(id));
       } else {
         res.status(404).json("Order not found");
-      }
-      next();
+      }      
     } catch (err) {
-      next(new Error(err));
+      res.status(500).send(`ERROR: ${error}`);
     }
   } else {
     res.status(405).json("Invalid status suplied");
   }
 }
 
-async function deleteOrder(req, res, next) {
+//Delete Function
+async function deleteOrder(req, res) {
   const id = +req.params.orderId;
   try {
     const orderToDelete = await findOrderById(id);
     if (orderToDelete) {
-      const query = deleteQuery(
-        "orders",
-        `order_id = ${id}`
-      );
+      const query = deleteQuery("orders", `id = ${id}`);
       await sequelize.query(query, { raw: true });
+      res.status(204).json();
     } else {
       res.status(404).json("Order not found");
     }
-    next();
-  } catch (err) {
-    next(new Error(err));
+  } catch (error) {
+    res.status(500).send(`ERROR: ${error}`);
   }
 }
 
 module.exports = {
-  findOrderById,
-  findFullOrderById,
   registerOrder,
+  validateArgumentsOrder,
   getOrders,
   updateOrderStatus,
   deleteOrder
