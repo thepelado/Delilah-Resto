@@ -406,7 +406,7 @@ definitions:
   order_complete:
     type: "object"
     properties:
-      order_id:
+      id:
         type: "number"
       order_status:
         type: "string"
@@ -464,7 +464,7 @@ definitions:
   order_uploaded:
     type: "object"
     properties:
-      order_id:
+      id:
         type: "number"
       order_status:
         type: "string"
@@ -524,7 +524,7 @@ definitions:
   user_registered:
     type: "object"
     properties:
-      user_id:
+      id:
         type: "number"
       username:
         type: "string"
@@ -571,7 +571,7 @@ definitions:
       - "photoUrls"
       - "price"
     properties:
-      product_id:
+      id:
         type: "integer"
         format: "int64"
       product_name:
