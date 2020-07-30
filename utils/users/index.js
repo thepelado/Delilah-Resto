@@ -22,7 +22,7 @@ async function findUserByUsername(username) {
 
 async function validateArgumentsUser(req, res, next) {
   const { username, password, firstname, lastname, address, email, phone_number, is_admin } = req.body;
-  if ( username && password && firstname && lastname && address && email &&phone_number)
+  if ( username && password && firstname && lastname && address && email && phone_number)
   {
     next();
   } else {

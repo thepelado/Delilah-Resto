@@ -21,7 +21,7 @@ Features:
 ### Clone the REPO:
 
 ```
-$ git clone https://github.com/alazzuri/delilah-resto.git
+$ git clone https://github.com/thepelado/Delilah-Resto.git
 ```
 
 or you just can download it from Github
@@ -77,7 +77,7 @@ Before start using the server, don't forget to edit `config.js` file (`db/sequel
 
 ```
 $ cd server
-$ node index.js
+$ node app.js
 ```
 
 ## Dependencies used

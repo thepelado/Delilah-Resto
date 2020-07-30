@@ -554,7 +554,7 @@ definitions:
   order_statusToUpload:
     type: "object"
     properties:
-      Status:
+      status:
         type: "string"
         description: "order status in the store"
         enum:

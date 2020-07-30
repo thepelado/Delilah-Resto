@@ -24,13 +24,9 @@ async function validateExistingProduct(req, res, next) {
     if (!existingProduct) {
       next();
     } else {
-      console.log(existingProduct.id, req.params.productId);
-      if (existingProduct.id === parseInt(req.params.productId))
-      {
+      if (existingProduct.id === parseInt(req.params.productId)) {
         next();
-      }
-      else
-      {
+      } else {
         res.status(409).json("Product already exist");
       }
     }
